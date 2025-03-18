@@ -32,6 +32,25 @@ public class Inventory {
 
     //<<< Clean Arch / Port Method
     public static void decreaseStock(OrderPlaced orderPlaced) {
+        repository()
+            .findById(Long.valueOf(orderPlaced.getProductId()))
+            .ifPresent(inventory -> {
+                if (inventory.getStock() >= orderPlaced.getQty()) {
+                    inventory.setStock(
+                        inventory.getStock() - orderPlaced.getQty()
+                    );
+                    repository().save(inventory);
+
+                    StockDecreased stockDecreased = new StockDecreased(
+                        inventory
+                    );
+                    stockDecreased.publishAfterCommit();
+                } else {
+                    OutOfStock outOfStock = new OutOfStock(inventory);
+                    outOfStock.setOrderId(orderPlaced.getId());
+                    outOfStock.publishAfterCommit();
+                }
+            });
         //implement business logic here:
 
         /** Example 1:  new item 
@@ -65,6 +84,25 @@ public class Inventory {
     //>>> Clean Arch / Port Method
     //<<< Clean Arch / Port Method
     public static void increaseStock(OrderCancelled orderCancelled) {
+        repository()
+            .findById(Long.valueOf(OrderCancelled.getProductId()))
+            .ifPresent(inventory -> {
+                if (inventory.getStock() >= OrderCancelled.getQty()) {
+                    inventory.setStock(
+                        inventory.getStock() + OrderCancelled.getQty()
+                    );
+                    repository().save(inventory);
+
+                    StockDecreased stockDecreased = new StockDecreased(
+                        inventory
+                    );
+                    stockDecreased.publishAfterCommit();
+                } else {
+                    OutOfStock outOfStock = new OutOfStock(inventory);
+                    outOfStock.setOrderId(OrderCancelled.getId());
+                    outOfStock.publishAfterCommit();
+                }
+            });
         //implement business logic here:
 
         /** Example 1:  new item 
